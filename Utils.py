@@ -73,6 +73,22 @@ def extrude_along_edges(section_mesh: bpy.types.Mesh, footprint: list, is_loop: 
     Returns:
         The extruded mesh.
     """
+    # Pre-filter footprint: remove consecutive duplicate points that would create
+    # zero-length edges and break the extrusion chain
+    cleaned = []
+    for pt in footprint:
+        if not cleaned or vec_from_verts(cleaned[-1], pt).length > 1e-6:
+            cleaned.append(pt)
+    # For loops, also check last-to-first
+    if is_loop and len(cleaned) > 1 and vec_from_verts(cleaned[-1], cleaned[0]).length < 1e-6:
+        cleaned.pop()
+    footprint = cleaned
+
+    if len(footprint) < 2:
+        # Not enough points to extrude, return empty mesh
+        m = bpy.data.meshes.new("Mesh")
+        return m
+
     # load the section mesh into bmesh
     bm = bmesh.new()
     bm.from_mesh(section_mesh)
@@ -110,10 +126,7 @@ def extrude_along_edges(section_mesh: bpy.types.Mesh, footprint: list, is_loop: 
             vec_next = vec_from_verts(footprint[i], footprint[i + 1])
         # end if
 
-        # normalize the vectors - skip degenerate zero-length edges
-        if vec_prev.length < 1e-6 or vec_next.length < 1e-6:
-            i += 1
-            continue
+        # normalize the vectors
         vec_prev.normalize()
         vec_next.normalize()
 
