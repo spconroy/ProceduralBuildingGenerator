@@ -207,30 +207,140 @@ def apply_positions(obj: bpy.types.Object, positions: list, collection):
 # end apply_positions
 
 
+def _get_texture_cache_dir():
+    """Get or create the texture cache directory next to this addon."""
+    cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "textures_cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    return cache_dir
+
+
+def _download_polyhaven_texture(texture_id, map_type, resolution="1k"):
+    """
+    Download a Poly Haven texture map if not already cached.
+    Returns the local file path.
+    """
+    import urllib.request
+    cache_dir = _get_texture_cache_dir()
+    filename = f"{texture_id}_{map_type}_{resolution}.jpg"
+    filepath = os.path.join(cache_dir, filename)
+
+    if os.path.exists(filepath):
+        return filepath
+
+    url = f"https://dl.polyhaven.org/file/ph-assets/Textures/jpg/{resolution}/{texture_id}/{filename}"
+    print(f"    Downloading: {url}")
+    try:
+        urllib.request.urlretrieve(url, filepath)
+        return filepath
+    except Exception as e:
+        print(f"    WARNING: Failed to download {url}: {e}")
+        return None
+
+
+def _create_pbr_material(name, texture_id, tint=None):
+    """
+    Create a Principled BSDF material with Poly Haven PBR textures.
+    Downloads diffuse, normal, and roughness maps.
+    Optional tint multiplies the diffuse color.
+    """
+    mat = bpy.data.materials.get(name)
+    if mat:
+        return mat
+
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
+
+    # Download texture maps
+    diff_path = _download_polyhaven_texture(texture_id, "diff")
+    nor_path = _download_polyhaven_texture(texture_id, "nor_gl")
+    rough_path = _download_polyhaven_texture(texture_id, "rough")
+
+    x_offset = -600
+
+    # Diffuse / Base Color
+    if diff_path:
+        tex_diff = nodes.new("ShaderNodeTexImage")
+        tex_diff.location = (x_offset, 300)
+        tex_diff.image = bpy.data.images.load(diff_path)
+        tex_diff.image.colorspace_settings.name = 'sRGB'
+        if tint:
+            mix = nodes.new("ShaderNodeMix")
+            mix.data_type = 'RGBA'
+            mix.location = (x_offset + 300, 300)
+            mix.inputs[0].default_value = 1.0  # factor
+            mix.blend_type = 'MULTIPLY'
+            mix.inputs[6].default_value = tint  # Color B
+            links.new(tex_diff.outputs["Color"], mix.inputs[7])  # Color A (index 7 for RGBA)
+            links.new(mix.outputs[2], bsdf.inputs["Base Color"])  # Result (index 2 for RGBA)
+        else:
+            links.new(tex_diff.outputs["Color"], bsdf.inputs["Base Color"])
+
+    # Normal map
+    if nor_path:
+        tex_nor = nodes.new("ShaderNodeTexImage")
+        tex_nor.location = (x_offset, -100)
+        tex_nor.image = bpy.data.images.load(nor_path)
+        tex_nor.image.colorspace_settings.name = 'Non-Color'
+        normal_map = nodes.new("ShaderNodeNormalMap")
+        normal_map.location = (x_offset + 300, -100)
+        links.new(tex_nor.outputs["Color"], normal_map.inputs["Color"])
+        links.new(normal_map.outputs["Normal"], bsdf.inputs["Normal"])
+
+    # Roughness map
+    if rough_path:
+        tex_rough = nodes.new("ShaderNodeTexImage")
+        tex_rough.location = (x_offset, -400)
+        tex_rough.image = bpy.data.images.load(rough_path)
+        tex_rough.image.colorspace_settings.name = 'Non-Color'
+        links.new(tex_rough.outputs["Color"], bsdf.inputs["Roughness"])
+
+    return mat
+
+
+def _create_simple_material(name, color, roughness=0.8, metallic=0.0, alpha=1.0):
+    """Fallback: create a solid-color Principled BSDF material."""
+    mat = bpy.data.materials.get(name)
+    if mat:
+        return mat
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get("Principled BSDF")
+    if bsdf:
+        bsdf.inputs["Base Color"].default_value = color
+        bsdf.inputs["Roughness"].default_value = roughness
+        bsdf.inputs["Metallic"].default_value = metallic
+    if alpha < 1.0:
+        mat.blend_method = 'BLEND'
+        if bsdf:
+            bsdf.inputs["Alpha"].default_value = alpha
+    return mat
+
+
 def load_materials() -> dict:
     """
-        list of materials:
-            pbg_wood
-            pbg_glass
-            pbg_color1
-            pbg_color2
-            pbg_roof
-    Returns:
-        dictionary, containing the materials
+    Create Principled BSDF materials with Poly Haven PBR textures.
+    Materials: pbg_wood, pbg_glass, pbg_color1, pbg_color2, pbg_roof
+    Falls back to solid colors if texture download fails.
     """
-    directory = os.path.dirname(os.path.realpath(__file__))
-    file_path = directory + os.sep + "default_materials.blend"
-    materials = dict()
-    with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
-        for material_name in data_from.materials:
-            is_imported = False
-            for c_material in bpy.data.materials:
-                if c_material.name.startswith(material_name):
-                    is_imported = True
-                    materials[material_name] = c_material
-                    break
-
-            if not is_imported:
-                bpy.ops.wm.append(filename=material_name, directory=file_path + os.sep + "Material" + os.sep)
-                materials[material_name] = bpy.data.materials[material_name]
+    print("  Loading Poly Haven PBR materials...")
+    materials = {
+        # Wall primary — plastered wall texture
+        "pbg_color1": _create_pbr_material(
+            "pbg_color1", "plastered_wall"),
+        # Wall accent / trim — worn plaster
+        "pbg_color2": _create_pbr_material(
+            "pbg_color2", "worn_plaster_wall"),
+        # Wood — weathered planks for doors and window frames
+        "pbg_wood": _create_pbr_material(
+            "pbg_wood", "weathered_planks"),
+        # Glass — simple semi-transparent material (no texture needed)
+        "pbg_glass": _create_simple_material(
+            "pbg_glass", (0.15, 0.18, 0.25, 1.0), roughness=0.1, metallic=0.1, alpha=0.6),
+        # Roof — clay roof tiles
+        "pbg_roof": _create_pbr_material(
+            "pbg_roof", "clay_roof_tiles_02"),
+    }
     return materials
