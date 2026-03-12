@@ -1,32 +1,23 @@
 ### ProceduralBuildingGenerator
-Blender addon for procedurally generating buildings
-
-### About
-This project was created as a part of my bachelor's thesis at the Faculty of Electrical Engineering, Computer Science and Information Technology Osijek
-
-The thesis will be made available some time in the future in Croatian, with the summary available in English.   
-I might rewrite the thesis in English as well(big maybe here)  
+Blender addon for procedurally generating buildings.
 
 ### Compatibility
-This addon is compatible with blender verstion 2.79  
-Blender 2.8 support is planned once it is released and stable  
+This addon is compatible with Blender 4.0+ (tested on Blender 5.0).
+
+Originally written for Blender 2.79 by Luka Simic. Ported to modern Blender API (collections, annotation-style properties, sidebar panels, updated matrix operators). Also supports headless/background generation for batch export workflows.
 
 ### Installation
-Clone or Download the repository  
-Copy the ProceduralBuildingGenerator to your addons folder  
-This addon requires no additional python libraries.  
+Clone or download the repository.
+Copy the ProceduralBuildingGenerator folder to your Blender addons directory.
+This addon requires no additional Python libraries.
 
 ### Usage
-The addon has it's own toolbar in the toolshelf panel  
-After changing parameters, you can click generate to generate a building  
-WARNING: using unreasonably large values might cause blender to crash due to lack of memory  
-WARNING: using incompatible param values might cause blender to crash due to no validation existing.  
-NOTE: delete the previous building before generating the new one to see the changes better.  
-Consult the wiki to see exactly what each parameter does
+The addon panel is in the 3D Viewport Sidebar (N panel) under the "PBG" tab.
+After changing parameters, click Generate to create a building.
 
-### Contributing
-This repository is currently NOT ACCEPTING pull requests.  
-Pull requests will be accepted some time in the future.
+WARNING: using unreasonably large values might cause Blender to crash due to lack of memory.
+WARNING: using incompatible param values might cause Blender to crash due to no validation existing.
+NOTE: delete the previous building before generating the new one to see the changes better.
 
 ### License
 GPL-3.0

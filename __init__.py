@@ -28,11 +28,11 @@ bl_info = {
     "description": "Proceduraly generate and edit buildings",
     "author": "Luka Šimić",
     "version": (0, 8, 0),
-    "blender": (2, 79, 0),
-    "location": "View3D > Toolbox > PBG",
+    "blender": (4, 0, 0),
+    "location": "View3D > Sidebar > PBG",
     "warning": "Under development. Might cause stability issues.",
-    "wiki_url": "https://github.com/lsimic/ProceduralBuildingGenerator/wiki",
-    "tracker_url": "https://github.com/lsimic/ProceduralBuildingGenerator/issues",
+    "wiki_url": "https://github.com/spconroy/ProceduralBuildingGenerator/wiki",
+    "tracker_url": "https://github.com/spconroy/ProceduralBuildingGenerator/issues",
     "support": "COMMUNITY",
     "category": "Add Mesh"
 }
