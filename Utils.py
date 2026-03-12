@@ -110,7 +110,10 @@ def extrude_along_edges(section_mesh: bpy.types.Mesh, footprint: list, is_loop: 
             vec_next = vec_from_verts(footprint[i], footprint[i + 1])
         # end if
 
-        # normalize the vectors
+        # normalize the vectors - skip degenerate zero-length edges
+        if vec_prev.length < 1e-6 or vec_next.length < 1e-6:
+            i += 1
+            continue
         vec_prev.normalize()
         vec_next.normalize()
 
@@ -119,19 +122,27 @@ def extrude_along_edges(section_mesh: bpy.types.Mesh, footprint: list, is_loop: 
         vec_next.negate()
         vec_sum = vec_prev + vec_next
         # TODO: this feels really hackish, but works. Should improve this...
-        if vec_sum.length == 0:
-            angle_desired = vec_0.xy.angle_signed(vec_next.xy) + 0.5*math.pi
+        if vec_sum.length < 1e-6:
+            if vec_next.xy.length < 1e-6:
+                angle_desired = 0
+            else:
+                angle_desired = vec_0.xy.angle_signed(vec_next.xy) + 0.5*math.pi
         else:
             angle_desired = vec_0.xy.angle_signed(vec_sum.xy, 0)
         # end if
 
-        if -math.pi < vec_next.xy.angle_signed(vec_prev.xy) < 0:
+        angle_between = vec_next.xy.angle_signed(vec_prev.xy)
+        if -math.pi < angle_between < 0:
             angle_desired += math.pi
         # end if
         angle_to_transform = angle_previous - angle_desired
 
         # calculate the scale to use in transformation
-        scale_desired = math.fabs(1/(math.cos(math.radians(90) - 0.5 * vec_next.xy.angle_signed(vec_prev.xy))))
+        cos_val = math.cos(math.radians(90) - 0.5 * angle_between)
+        if abs(cos_val) < 1e-6:
+            scale_desired = 1.0
+        else:
+            scale_desired = math.fabs(1.0 / cos_val)
         scale_to_transform = scale_desired / scale_previous
 
         # if it's the first iteration, move the mesh from the center to the first vert position

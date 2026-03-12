@@ -468,7 +468,7 @@ class PBGPropertyGroup(PropertyGroup):
 # end PBGPropertyGroup
 
 
-class PBGToolbarGeneralPanel(Panel):
+class PBG_PT_GeneralPanel(Panel):
     # TODO: docstring
     bl_label = "General Settings"
     bl_category = "PBG"
@@ -499,7 +499,7 @@ class PBGToolbarGeneralPanel(Panel):
 # end PBGToolbarPanel
 
 
-class PBGToolbarLayoutPanel(Panel):
+class PBG_PT_LayoutPanel(Panel):
     # TODO: docstring
     bl_label = "Layout Settings"
     bl_category = "PBG"
@@ -518,7 +518,7 @@ class PBGToolbarLayoutPanel(Panel):
 # end PBGLayoutPanel
 
 
-class PBGToolbarPillarPanel(Panel):
+class PBG_PT_PillarPanel(Panel):
     # TODO: docstring
     bl_label = "Pillar Settings"
     bl_category = "PBG"
@@ -543,7 +543,7 @@ class PBGToolbarPillarPanel(Panel):
 # end PBGPillarPanel
 
 
-class PBGToolbarWallPanel(Panel):
+class PBG_PT_WallPanel(Panel):
     # TODO: docstring
     bl_label = "Wall settings"
     bl_category = "PBG"
@@ -572,7 +572,7 @@ class PBGToolbarWallPanel(Panel):
 # end PBGToolbarWallPanel
 
 
-class PBGToolbarWindowPanel(Panel):
+class PBG_PT_WindowPanel(Panel):
     bl_label = "Window Settings"
     bl_category = "PBG"
     bl_space_type = "VIEW_3D"
@@ -604,7 +604,7 @@ class PBGToolbarWindowPanel(Panel):
 # end PBGToolbarWindowPanel
 
 
-class PBGToolbarWindowUnderPanel(Panel):
+class PBG_PT_WindowUnderPanel(Panel):
     bl_label = "Window Under Settings"
     bl_category = "PBG"
     bl_space_type = "VIEW_3D"
@@ -639,7 +639,7 @@ class PBGToolbarWindowUnderPanel(Panel):
 # end PBGToolbarWindowPanel
 
 
-class PBGToolbarWindowAbovePanel(Panel):
+class PBG_PT_WindowAbovePanel(Panel):
     bl_label = "Window Above Settings"
     bl_category = "PBG"
     bl_space_type = "VIEW_3D"
@@ -669,7 +669,7 @@ class PBGToolbarWindowAbovePanel(Panel):
 # end PBGToolbarWindowPanel
 
 
-class PBGToolbarStairsPanel(Panel):
+class PBG_PT_StairsPanel(Panel):
     bl_label = "Stairs Settings"
     bl_category = "PBG"
     bl_space_type = "VIEW_3D"
@@ -690,7 +690,7 @@ class PBGToolbarStairsPanel(Panel):
 # end PBGToolbarStairsPanel
 
 
-class PBGToolbarRoofPanel(Panel):
+class PBG_PT_RoofPanel(Panel):
     bl_label = "Roof Settings"
     bl_category = "PBG"
     bl_space_type = "VIEW_3D"
@@ -710,7 +710,7 @@ class PBGToolbarRoofPanel(Panel):
 # end PBGToolbarRoofPanel
 
 
-class PBGToolbarDoorPanel(Panel):
+class PBG_PT_DoorPanel(Panel):
     bl_label = "Door Settings"
     bl_category = "PBG"
     bl_space_type = "VIEW_3D"
@@ -741,7 +741,7 @@ class PBGToolbarDoorPanel(Panel):
 # end PBGToolbarDoorPanel
 
 
-class PBGToolbarGeneratePanel(Panel):
+class PBG_PT_GeneratePanel(Panel):
     # TODO: docstring
     bl_label = "Generate"
     bl_category = "PBG"

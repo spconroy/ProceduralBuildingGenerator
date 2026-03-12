@@ -32,7 +32,7 @@ class Generator(bpy.types.Operator):
     bl_idname = "pbg.generate_building"
     bl_label = "Generate Building"
 
-    def invoke(self, context, event):
+    def execute(self, context):
         collection = bpy.data.collections.get("pbg_collection")
         if not collection:
             collection = bpy.data.collections.new("pbg_collection")
